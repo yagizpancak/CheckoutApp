@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: TrendyolCheckout
+  profiles:
+    active: local
+
+cart:
+  digitalItemCategoryId: 7889
+
+  maxTotalPrice: 500000
+  maxItem: 30
+  maxUniqueItem: 10
+  maxItemQuantity: 10
+  maxDigitalItemQuantity: 5
+
+  vasItemValidCategories: [1001,3004]
+  vasItemCategoryId: 3242
+  vasItemSellerId: 5003
+  maxUniqueVasItem: 3
+
+promotion:
+  categoryPromotionId: 5676
+  categoryPromotionCategoryId: 3003
+  categoryPromotionDiscountPercentage: 0.05
+  
+  sameSellerPromotionId: 9909
+  sameSellerPromotionDiscountPercentage: 0.1
+  
+  totalPricePromotionId: 1232
+
+controller:
+  addItemResponse: "Item is added successfully."
+  addVasItemResponse: "Vas item is added successfully."
+  removeItemResponse: "Item is removed successfully."
+  resetCartResponse: "Cart is reset successfully."
