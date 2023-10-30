@@ -82,7 +82,7 @@ public class CartService {
 		var itemInCart = cartRepository.getItem(addItemRequest.getItemId());
 		int cartQuantity;
 		if (itemInCart.isEmpty()) {
-			return false;
+			return addItemRequest.getQuantity() > maxQuantity;
 		} else {
 			cartQuantity = itemInCart.get().getQuantity();
 		}
@@ -158,7 +158,13 @@ public class CartService {
 			var promotion = promotionCalculator.getSuitablePromotion(cartRepository.getCart());
 
 			if (promotion.getTotalDiscount() > cartRepository.getTotalPrice()){
-				throw new Exception();
+				var totalPricePromotion = PromotionDTO.builder()
+						.promotionId(promotion.getPromotionId())
+						.totalDiscount(cartRepository.getTotalPrice())
+						.build();
+				cartRepository.setPromotion(totalPricePromotion);
+				logger.info("Promotion applied: {}", totalPricePromotion);
+				return;
 			}
 
 			logger.info("Promotion applied: {}", promotion);
