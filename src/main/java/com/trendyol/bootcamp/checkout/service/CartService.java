@@ -1,8 +1,10 @@
 package com.trendyol.bootcamp.checkout.service;
 
 import com.trendyol.bootcamp.checkout.model.dto.PromotionDTO;
+import com.trendyol.bootcamp.checkout.model.entity.item.DefaultItem;
 import com.trendyol.bootcamp.checkout.model.exception.*;
 import com.trendyol.bootcamp.checkout.model.request.AddItemRequest;
+import com.trendyol.bootcamp.checkout.model.request.AddVasItemRequest;
 import com.trendyol.bootcamp.checkout.model.request.RemoveItemRequest;
 import com.trendyol.bootcamp.checkout.model.response.cart.CartResponse;
 import com.trendyol.bootcamp.checkout.properties.CartProperties;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +89,45 @@ public class CartService {
 
 		var quantitySum = addItemRequest.getQuantity() + cartQuantity;
 		return quantitySum > maxQuantity;
+	}
+
+	public void addVasItem(AddVasItemRequest addVasItemRequest){
+		var defaultItem = cartRepository.getItem(addVasItemRequest.getItemId())
+				.orElseThrow(ItemNotFoundException::new);
+		var vasItem = addVasItemRequest.toEntity();
+
+		try {
+			if (isVasItemNotValid((DefaultItem) defaultItem, addVasItemRequest)) {
+				throw new VasItemNotValidException();
+			}
+			((DefaultItem) defaultItem).addVasItem(vasItem);
+		}catch (VasItemNotValidException e){
+			throw new VasItemNotValidException();
+		}catch(Exception e) {
+			throw new VasItemCanNotAddedException();
+		}
+		logger.info("Vas Item added with: {}", addVasItemRequest);
+
+		var totalNewItemPrice = addVasItemRequest.getQuantity() * addVasItemRequest.getPrice();
+		cartRepository.updateTotalPrice(totalNewItemPrice);
+		checkAndApplyPromotion();
+	}
+
+	private boolean isVasItemNotValid(DefaultItem defaultItem, AddVasItemRequest addVasItemRequest) {
+		if (Arrays.stream(cartProperties.getVasItemValidCategories())
+				.noneMatch(id -> id==defaultItem.getCategoryId())){
+			return true;
+		}
+
+		if (addVasItemRequest.getCategoryId() != cartProperties.getVasItemCategoryId()){
+			return true;
+		}
+
+		if (addVasItemRequest.getSellerId() != cartProperties.getVasItemSellerId()){
+			return true;
+		}
+
+		return defaultItem.getVasItems().size() >= cartProperties.getMaxUniqueVasItem();
 	}
 
 	public void removeItem(RemoveItemRequest removeItemRequest){

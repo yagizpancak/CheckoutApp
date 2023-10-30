@@ -1,6 +1,7 @@
 package com.trendyol.bootcamp.checkout.controller;
 
 import com.trendyol.bootcamp.checkout.model.request.AddItemRequest;
+import com.trendyol.bootcamp.checkout.model.request.AddVasItemRequest;
 import com.trendyol.bootcamp.checkout.model.request.RemoveItemRequest;
 import com.trendyol.bootcamp.checkout.model.response.ApplicationResponse;
 import com.trendyol.bootcamp.checkout.model.response.cart.CartResponse;
@@ -41,6 +42,17 @@ public class CartController {
 		);
 	}
 
+	@PostMapping("/vas-item")
+	public ResponseEntity<ApplicationResponse<String>> addVasItem(@RequestBody AddVasItemRequest addVasItemRequest){
+		cartService.addVasItem(addVasItemRequest);
+		return ResponseEntity.status(HttpStatus.CREATED).body(
+				ApplicationResponse.<String>builder()
+						.result(true)
+						.message(addVasItemResponse)
+						.build()
+		);
+	}
+
 	@DeleteMapping("/item")
 	public ResponseEntity<ApplicationResponse<String>> removeItem(@RequestBody RemoveItemRequest removeItemRequest){
 		cartService.removeItem(removeItemRequest);
@@ -52,7 +64,6 @@ public class CartController {
 		);
 	}
 
-
 	@DeleteMapping()
 	public ResponseEntity<ApplicationResponse<String>> resetCart(){
 		cartService.resetCart();
@@ -63,7 +74,6 @@ public class CartController {
 						.build()
 		);
 	}
-
 
 	@GetMapping()
 	public ResponseEntity<ApplicationResponse<CartResponse>> getCartDetails(){
