@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -500,11 +501,6 @@ class CartServiceTest {
 		addItemRequest.setPrice(10);
 		addItemRequest.setQuantity(1);
 
-		var promotion = PromotionDTO.builder()
-				.promotionId(255)
-				.totalDiscount(250)
-				.build();
-
 		var expectedPromotion = PromotionDTO.builder()
 				.promotionId(0)
 				.totalDiscount(0)
@@ -524,7 +520,7 @@ class CartServiceTest {
 		when(cartRepository.getItem(addItemRequest.getItemId())).thenReturn(Optional.empty());
 
 
-		when(promotionCalculator.getSuitablePromotion(cart)).thenReturn(promotion);
+		when(promotionCalculator.getSuitablePromotion(cart)).thenThrow(new NoSuchElementException());
 
 		//when
 		cartService.addItem(addItemRequest);
