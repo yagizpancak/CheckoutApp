@@ -29,6 +29,17 @@ public class CartController {
 	}
 
 
+	@DeleteMapping()
+	public ResponseEntity<ApplicationResponse<String>> resetCart(){
+		cartService.resetCart();
+		return ResponseEntity.status(HttpStatus.OK).body(
+				ApplicationResponse.<String>builder()
+						.result(true)
+						.message(resetCartResponse)
+						.build()
+		);
+	}
+
 	@GetMapping()
 	public ResponseEntity<ApplicationResponse<CartResponse>> getCartDetails(){
 		return ResponseEntity.status(HttpStatus.OK).body(

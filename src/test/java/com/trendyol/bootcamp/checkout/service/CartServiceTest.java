@@ -27,6 +27,14 @@ class CartServiceTest {
 	@Mock
 	private PromotionCalculator promotionCalculator;
 
+	@Test
+	void it_should_reset_cart(){
+		//given
+		//when
+		cartService.resetCart();
+		//then
+		verify(cartRepository, times(1)).resetCard();
+	}
 
 	@Test
 	void it_should_display_cart(){

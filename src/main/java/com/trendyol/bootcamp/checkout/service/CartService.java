@@ -19,6 +19,10 @@ public class CartService {
 	private final Logger logger = LoggerFactory.getLogger(getClass());
 
 
+	public void resetCart(){
+		logger.info("Cart reset.");
+		cartRepository.resetCard();
+	}
 
 	public CartResponse displayCart() {
 		logger.info("Cart displayed.");

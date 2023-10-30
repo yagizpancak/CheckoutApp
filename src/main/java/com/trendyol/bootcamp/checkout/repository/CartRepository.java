@@ -16,5 +16,8 @@ import org.springframework.stereotype.Repository;
 public class CartRepository {
 	private Cart cart;
 
+	public void resetCard() {
+		setCart(new Cart());
+	}
 
 }
