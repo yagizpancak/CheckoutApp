@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<ApplicationResponse<String>> handleGeneralException(Exception e) {
+	public ResponseEntity<ApplicationResponse<String>> handleGeneralException() {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
 				ApplicationResponse.<String>builder()
 						.result(false)
