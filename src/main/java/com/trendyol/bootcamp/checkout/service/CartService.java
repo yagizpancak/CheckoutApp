@@ -1,7 +1,8 @@
 package com.trendyol.bootcamp.checkout.service;
 
 import com.trendyol.bootcamp.checkout.model.dto.PromotionDTO;
-import com.trendyol.bootcamp.checkout.model.exception.ItemNotFoundException;
+import com.trendyol.bootcamp.checkout.model.exception.*;
+import com.trendyol.bootcamp.checkout.model.request.AddItemRequest;
 import com.trendyol.bootcamp.checkout.model.request.RemoveItemRequest;
 import com.trendyol.bootcamp.checkout.model.response.cart.CartResponse;
 import com.trendyol.bootcamp.checkout.properties.CartProperties;
@@ -20,6 +21,72 @@ public class CartService {
 	private final PromotionCalculator promotionCalculator;
 	private final CartProperties cartProperties;
 	private final Logger logger = LoggerFactory.getLogger(getClass());
+
+	public void addItem(AddItemRequest addItemRequest){
+		if (hasCartLimitExceeded(addItemRequest.getQuantity(), addItemRequest.getPrice())){
+			throw new CartLimitExceededException();
+		}
+
+		if (addItemRequest.getCategoryId() == cartProperties.getDigitalItemCategoryId()) {
+			addDigitalItem(addItemRequest);
+		}else{
+			addDefaultItem(addItemRequest);
+		}
+		logger.info("Item added with: {}", addItemRequest);
+
+		var totalNewItemPrice = addItemRequest.getQuantity() * addItemRequest.getPrice();
+		cartRepository.updateTotalPrice(totalNewItemPrice);
+		checkAndApplyPromotion();
+	}
+
+	private void addDefaultItem(AddItemRequest addItemRequest) {
+		if (cartRepository.hasCartDigitalItem()){
+			throw new DefaultItemCanNotAddedException();
+		}
+
+		if (hasExceedMaxItemQuantity(addItemRequest, cartProperties.getMaxItemQuantity())){
+			throw new ItemQuantityExceedException(cartProperties.getMaxItemQuantity());
+		}
+
+		cartRepository.saveItem(addItemRequest.toDefaultItemEntity());
+	}
+
+	private void addDigitalItem(AddItemRequest addItemRequest) {
+		if (cartRepository.hasCartDefaultItem()){
+			throw new DigitalItemCanNotAddedException();
+		}
+
+		if (hasExceedMaxItemQuantity(addItemRequest, cartProperties.getMaxDigitalItemQuantity())) {
+			throw new ItemQuantityExceedException(cartProperties.getMaxDigitalItemQuantity());
+		}
+		cartRepository.saveItem(addItemRequest.toDigitalItemEntity());
+	}
+
+	private boolean hasCartLimitExceeded(int quantity, double price) {
+		if (cartRepository.getTotalItemNumber() + quantity > cartProperties.getMaxItem()){
+			return true;
+		}
+
+		if (cartRepository.getTotalUniqueItemNumber() >= cartProperties.getMaxUniqueItem() ){
+			return true;
+		}
+
+		var totalNewItemPrice = quantity * price;
+		return cartRepository.getCart().getTotalPrice() + totalNewItemPrice > cartProperties.getMaxTotalPrice();
+	}
+
+	private boolean hasExceedMaxItemQuantity(AddItemRequest addItemRequest, int maxQuantity) {
+		var itemInCart = cartRepository.getItem(addItemRequest.getItemId());
+		int cartQuantity;
+		if (itemInCart.isEmpty()) {
+			return false;
+		} else {
+			cartQuantity = itemInCart.get().getQuantity();
+		}
+
+		var quantitySum = addItemRequest.getQuantity() + cartQuantity;
+		return quantitySum > maxQuantity;
+	}
 
 	public void removeItem(RemoveItemRequest removeItemRequest){
 		var itemToRemove = cartRepository.getItem(removeItemRequest.getItemId())
