@@ -1,10 +1,10 @@
-package com.trendyol.bootcamp;
+package com.trendyol.bootcamp.checkout;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TrendyolBootcampApplicationTests {
+class TrendyolCheckoutApplicationTests {
 
 	@Test
 	void contextLoads() {
