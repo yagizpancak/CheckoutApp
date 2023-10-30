@@ -1,5 +1,6 @@
 package com.trendyol.bootcamp.checkout.controller;
 
+import com.trendyol.bootcamp.checkout.model.request.RemoveItemRequest;
 import com.trendyol.bootcamp.checkout.model.response.ApplicationResponse;
 import com.trendyol.bootcamp.checkout.model.response.cart.CartResponse;
 import com.trendyol.bootcamp.checkout.service.CartService;
@@ -28,6 +29,17 @@ public class CartController {
 		this.cartService = cartService;
 	}
 
+	@DeleteMapping("/item")
+	public ResponseEntity<ApplicationResponse<String>> removeItem(@RequestBody RemoveItemRequest removeItemRequest){
+		cartService.removeItem(removeItemRequest);
+		return ResponseEntity.status(HttpStatus.OK).body(
+				ApplicationResponse.<String>builder()
+						.result(true)
+						.message(removeItemResponse)
+						.build()
+		);
+	}
+
 
 	@DeleteMapping()
 	public ResponseEntity<ApplicationResponse<String>> resetCart(){
@@ -39,6 +51,7 @@ public class CartController {
 						.build()
 		);
 	}
+
 
 	@GetMapping()
 	public ResponseEntity<ApplicationResponse<CartResponse>> getCartDetails(){
